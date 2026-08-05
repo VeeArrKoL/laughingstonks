@@ -16,7 +16,27 @@ Laughingstonks supports the following configuration properties:
 | Property | Default | Description |
 | --- | --- | --- |
 | `laughingstonks_maxDaysDisplayed` | `3` | The maximum number of days to display in a search. Wider screens can support larger values. |
-| `laughingstonks_maxFights` | `500` | The maximum number of fights on each day to display data for. |
+| `laughingstonks_maxFights` | `500` | The maximum number of fights on each day to display data for. (Only applies to the relay script, not API calls.) |
+
+## API
+It is possible to call the underlying laughingstonks functions directly.
+
+Signatures:
+```
+item[int] laughing_stock_drops(int class_id, int path_id, int daycount, int max_fights);
+
+item[int] laughing_stock_drops(class clazz, path the_path, int daycount, int max_fights);
+```
+
+Example:
+```
+import <laughingstonks.ash>;
+
+item[int] laughing_stock_drops(my_class(), my_path(), my_daycount(), 500);
+foreach fight_num, drop in results {
+	print(`{fight_num} {drop.name}`);
+}
+```
 
 ## Questions
 * Why does the interface look so bad?

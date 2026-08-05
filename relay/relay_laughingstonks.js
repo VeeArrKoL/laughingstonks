@@ -2,6 +2,7 @@
 // by VeeArr (#2045369)
 
 const kol = require("kolmafia");
+const LS = require("laughingstonks.ash");
 
 const MY_FILENAME="./relay_laughingstonks.js";
 const MAX_DAYS=11;
@@ -99,11 +100,6 @@ function handleSearchBar(config){
 	return rv+"\n";
 }
 
-const FIXED_DROP_TURNS=[1,2,4,7,11,16,22,29,37,46,56];
-const BASIC_FRUIT=["orange","grapefruit","grapes","lemon","lime","papaya","cranberries","strawberry","cherry","kumquat","tangerine","raspberry","kiwi","blackberry","banana","cactus fruit","plum","pear","peach"];
-const ADV_FRUIT=["classic banana","antique watermelon","quince"];
-const ADV_ICONS=["bigglasses","strboost","dinseybrain"];
-
 function handleSearch(config){
 	let rv="<b>Results:</b><br/><br/>";
 	rv+="<style>table{border-spacing:0px} tr:nth-child(even){background-color:#FFFFFF} tr:nth-child(odd){background-color:#DDDDDD} td{padding:2px 5px}</style>";
@@ -122,59 +118,28 @@ function handleSearch(config){
 	return rv;
 }
 
+const ADV_ICONS={"classic banana":"bigglasses","antique watermelon":"strboost","quince":"dinseybrain"};
+
 function buildTableForDay(config,day){
-	let results=[];
-	let pityCount=0;
-	let pityThresh=10;
-	
 	let maxF=500;
 	let maxFP=kol.getProperty("laughingstonks_maxFights");
 	if(maxFP!=""){
 		maxF=parseInt(maxFP);
 	}
 	
-	for(let f=0;f<maxF;f++) {
-		let seed=config.classId**3+84*config.pathId+123*(day-1)+381*f;
-		let rng=kol.phpSeed(seed);
-		let hasDrop;
-		if(f<=56) {
-			if (FIXED_DROP_TURNS.includes(f)) {
-				hasDrop=true;
-			} else {
-				hasDrop=false;
-			}
-		} else {
-			hasDrop=(kol.phpMtRand(rng,1,50)==1);
-		}
-		if(!hasDrop){ continue; }
-		
-		let advP=kol.phpMtRand(rng,1,30);
-		let threshold=3;
-		if(pityCount<3) {
-			threshold=pityThresh;
-		}
-		let isAdv=(advP<=threshold);
-		let fruit;
-		let icon="";
-		if(isAdv) {
-			pityCount++;
-			pityThresh=10;
-			let idx=kol.phpMtRand(rng,0,2);
-			fruit=ADV_FRUIT[idx];
-			icon="<img src='/images/itemimages/"+ADV_ICONS[idx]+".gif'/>";
-		} else {
-			pityThresh+=10;
-			let idx=kol.phpMtRand(rng,0,18);
-			fruit=BASIC_FRUIT[idx];
-		}
-
-		results.push({fight:f,fruit,icon,isAdv});
-	}
+	let results=LS.laughingStockDrops(config.classId,config.pathId,day,maxF);
 	
 	let rv="<table>";
 	rv+="<tr><th>Fight #</th><th colspan=2>Drop</th></tr>";
-	for(result of results){
-		rv+="<tr"+(result.isAdv?" style='font-weight:bold'":"")+"'><td style='text-align:right'>"+result.fight+"</td><td>"+result.fruit+"</td><td>"+result.icon+"</td></tr>";
+	for([fight,drop] in results){
+		let dropName=drop.name;
+		let isAdv=false;
+		let icon="";
+		if(dropName in ADV_ICONS){
+			isAdv=true;
+			icon="<img src='/images/itemimages/"+ADV_ICONS[dropName]+".gif'/>";
+		}
+		rv+="<tr"+(isAdv?" style='font-weight:bold'":"")+"'><td style='text-align:right'>"+fight+"</td><td>"+dropName+"</td><td>"+icon+"</td></tr>";
 	}
 	rv+="</table>";
 	
