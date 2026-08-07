@@ -13,7 +13,9 @@ module.exports.main = function main(){
 	let fields=kol.formFields();
 	let config=parseConfig(fields);
 	
-	output+=handleSearchBar(config);
+	if(!config.dumpAll){
+		output+=handleSearchBar(config);
+	}
 	output+=handleSearch(config);
 	
 	let page="<html><head><title>laughingstonks</title></head><body><center>\n"+output+"</center></body></html>";
@@ -49,7 +51,12 @@ function parseConfig(fields){
 		daycountMax=Math.max(daycountMin,Math.min(daycountMax,daycountMaxHardCap));
 	}
 	
-	return {classId,pathId,daycountMin,daycountMax};
+	let dumpAll=false;
+	if("dumpAll" in fields && fields["dumpAll"]=="true"){
+		dumpAll=true;
+	}
+	
+	return {classId,pathId,daycountMin,daycountMax,dumpAll};
 }
 
 function handleSearchBar(config){
@@ -103,33 +110,45 @@ function handleSearchBar(config){
 }
 
 function handleSearch(config){
-	let rv="<b>Results:</b><br/><br/>";
-	rv+="<style>table{border-spacing:0px} tr:nth-child(even){background-color:#FFFFFF} tr:nth-child(odd){background-color:#DDDDDD} td{padding:2px 5px}</style>";
+	let rv="<style>table{border-spacing:0px} tr:nth-child(even){background-color:#FFFFFF} tr:nth-child(odd){background-color:#DDDDDD} td{padding:2px 5px}</style>";
 	
-	rv+="<table><tr style='background-color:#FFFFFF'>";
-	for(day=config.daycountMin;day<=config.daycountMax;day++){
+	if(config.dumpAll){
+		for(combo of getClassPathCombos()){
+			rv+="<b>"+combo.className+" / "+combo.pathName+"</b><br/>";
+			rv+=buildTable(combo.classId,combo.pathId,1,4);
+		}
+	}else{
+		rv+="<b>Results:</b><br/><br/>";
+		rv+=buildTable(config.classId,config.pathId,config.daycountMin,config.daycountMax);
+	}
+	return rv;
+}
+
+function buildTable(classId,pathId,daycountMin,daycountMax){
+	rv="<table><tr style='background-color:#FFFFFF'>";
+	for(day=daycountMin;day<=daycountMax;day++){
 		rv+="<th>Day "+day+"</th>";
 	}
-	rv+="</tr><tr>";
-	for(day=config.daycountMin;day<=config.daycountMax;day++){
+	rv+="</tr><tr>\n";
+	for(day=daycountMin;day<=daycountMax;day++){
 		rv+="<td style='vertical-align:top'>";
-		rv+=buildTableForDay(config,day);
-		rv+="</td>";
+		rv+=buildTableForDay(classId,pathId,day);
+		rv+="</td>\n";
 	}
-	rv+="</tr></table>\n";
+	rv+="</tr></table><br/>\n";
 	return rv;
 }
 
 const ADV_ICONS={"classic banana":"bigglasses","antique watermelon":"strboost","quince":"dinseybrain"};
 
-function buildTableForDay(config,day){
+function buildTableForDay(classId,pathId,day){
 	let maxF=500;
 	let maxFP=kol.getProperty("laughingstonks_maxFights");
 	if(maxFP!=""){
 		maxF=parseInt(maxFP);
 	}
 	
-	let results=LS.laughingStockDrops(config.classId,config.pathId,day,maxF);
+	let results=LS.laughingStockDrops(classId,pathId,day,maxF);
 	
 	let rv="<table>";
 	rv+="<tr><th>Fight #</th><th colspan=2>Drop</th></tr>";
@@ -141,11 +160,11 @@ function buildTableForDay(config,day){
 			isAdv=true;
 			icon="<img src='/images/itemimages/"+ADV_ICONS[dropName]+".gif'/>";
 		}
-		rv+="<tr"+(isAdv?" style='font-weight:bold'":"")+"'><td style='text-align:right'>"+fight+"</td><td>"+dropName+"</td><td>"+icon+"</td></tr>";
+		rv+="<tr"+(isAdv?" style='font-weight:bold'":"")+"><td style='text-align:right'>"+fight+"</td><td>"+dropName+"</td><td>"+icon+"</td></tr>";
 	}
 	rv+="</table>";
 	
-	return rv+"\n";
+	return rv;
 }
 
 function getMaxDaysDisplayed(){
@@ -155,4 +174,27 @@ function getMaxDaysDisplayed(){
 		maxDaysDisplayed=parseInt(maxDaysDisplayedP);
 	}
 	return Math.min(maxDaysDisplayed,MAX_DAYS);
+}
+
+function getClassPathCombos(){
+	rv=[];
+				
+	for(path of [Path.get("none"), ...Path.all()]){
+		let pathClassFound=false;
+		for(clazz of Class.all()){
+			if(clazz.path==path){
+				pathClassFound=true;
+				let pathName=path.id==0?"Unrestricted":path.name;
+				rv.push({classId:clazz.id,className:kol.toString(clazz),pathId:path.id,pathName});
+			}
+		}
+		if(!pathClassFound){
+			for(i=1;i<=6;i++){
+				clazz=kol.toClass(i);
+				rv.push({classId:clazz.id,className:kol.toString(clazz),pathId:path.id,pathName:path.name});
+			}
+		}
+	}
+	rv.sort((a,b)=>(a.pathId*1000+a.classId)-(b.pathId*1000+b.classId));
+	return rv;
 }
