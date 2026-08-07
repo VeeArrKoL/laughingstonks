@@ -10,7 +10,7 @@ git checkout VeeArrKoL/laughingstonks
 ## Usage
 Open the relay script and select the class and path that you want to search. (It will start out using your current class and path.) After clicking search, a table will be displayed for each day, listing the expected fruit drops that will occur after a certain number of successful combats with the Portable Laughing Stock equipped.
 
-Alternatively you can look up whichever class/path combination you are looking for on [this page](all_combos.html).
+Alternatively you can look up whichever class/path combination you are looking for on [this page](https://veearrkol.github.io/laughingstonks/all_combos.html).
 
 ## Configuration
 Laughingstonks supports the following configuration properties:
