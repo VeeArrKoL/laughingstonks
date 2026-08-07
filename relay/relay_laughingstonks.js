@@ -5,7 +5,7 @@ const kol = require("kolmafia");
 const LS = require("laughingstonks.ash");
 
 const MY_FILENAME="./relay_laughingstonks.js";
-const MAX_DAYS=11;
+const MAX_DAYS=4;
 
 module.exports.main = function main(){
 	let output="";
@@ -32,22 +32,22 @@ function parseConfig(fields){
 		pathId=parseInt(fields["pathId"]);
 	}
 	
-	let daycountMin=kol.myDaycount();
-	if("daycountMin" in fields){
-		daycountMin=parseInt(fields["daycountMin"]);
+	let maxDaysDisplayed=getMaxDaysDisplayed();
+	let daycountMin=1;
+	let daycountMax=MAX_DAYS;
+	if(maxDaysDisplayed<MAX_DAYS){
+		daycountMin=kol.myDaycount();
+		if("daycountMin" in fields){
+			daycountMin=parseInt(fields["daycountMin"]);
+		}
+		
+		let daycountMaxHardCap=Math.min(MAX_DAYS,daycountMin+maxDaysDisplayed-1);
+		daycountMax=daycountMaxHardCap;
+		if("daycountMax" in fields){
+			daycountMax=parseInt(fields["daycountMax"]);
+		}
+		daycountMax=Math.max(daycountMin,Math.min(daycountMax,daycountMaxHardCap));
 	}
-	
-	let maxDaysDisplayed=3;
-	let maxDaysDisplayedP=kol.getProperty("laughingstonks_maxDaysDisplayed");
-	if(maxDaysDisplayedP!=""){
-		maxDaysDisplayed=parseInt(maxDaysDisplayedP);
-	}
-	let daycountMaxHardCap=Math.min(MAX_DAYS,daycountMin+maxDaysDisplayed-1);
-	let daycountMax=daycountMaxHardCap;
-	if("daycountMax" in fields){
-		daycountMax=parseInt(fields["daycountMax"]);
-	}
-	daycountMax=Math.max(daycountMin,Math.min(daycountMax,daycountMaxHardCap));
 	
 	return {classId,pathId,daycountMin,daycountMax};
 }
@@ -85,15 +85,17 @@ function handleSearchBar(config){
 	}
 	rv+="</select><br/>";
 	
-	rv+="Days: <select name='daycountMin'>";
-	for(d=1;d<=MAX_DAYS;d++){
-		rv+="<option value='"+d+"'"+(d==config.daycountMin?" selected":"")+">"+d+"</option>";
+	if(getMaxDaysDisplayed()<MAX_DAYS){
+		rv+="Days: <select name='daycountMin'>";
+		for(d=1;d<=MAX_DAYS;d++){
+			rv+="<option value='"+d+"'"+(d==config.daycountMin?" selected":"")+">"+d+"</option>";
+		}
+		rv+="</select> - <select name='daycountMax'>";
+		for(d=1;d<=MAX_DAYS;d++){
+			rv+="<option value='"+d+"'"+(d==config.daycountMax?" selected":"")+">"+d+"</option>";
+		}
+		rv+="</select><br/>";
 	}
-	rv+="</select> - <select name='daycountMax'>";
-	for(d=1;d<=MAX_DAYS;d++){
-		rv+="<option value='"+d+"'"+(d==config.daycountMax?" selected":"")+">"+d+"</option>";
-	}
-	rv+="</select><br/>";
 	
 	rv+="<br/><button type='submit' name='action' value='search'>Search</button></form>";
 	
@@ -144,4 +146,13 @@ function buildTableForDay(config,day){
 	rv+="</table>";
 	
 	return rv+"\n";
+}
+
+function getMaxDaysDisplayed(){
+	let maxDaysDisplayed=4;
+	let maxDaysDisplayedP=kol.getProperty("laughingstonks_maxDaysDisplayed");
+	if(maxDaysDisplayedP!=""){
+		maxDaysDisplayed=parseInt(maxDaysDisplayedP);
+	}
+	return Math.min(maxDaysDisplayed,MAX_DAYS);
 }

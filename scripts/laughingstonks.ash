@@ -10,6 +10,12 @@ item[3] ADV_FRUIT={$item[classic banana], $item[antique watermelon], $item[quinc
 
 item[int] laughing_stock_drops(int class_id, int path_id, int daycount, int max_fights){
 	item[int] rv;
+	
+	if(daycount>4){
+		print("Portable Laughing Stock drops are not seeded beyond day 4.","red");
+		return rv;
+	}
+	
 	int pity_count=0;
 	int pity_threshold=10;
 	int fixed_ptr=0;
