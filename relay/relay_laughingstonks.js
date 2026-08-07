@@ -158,7 +158,7 @@ function buildTableForDay(classId,pathId,day){
 		let icon="";
 		if(dropName in ADV_ICONS){
 			isAdv=true;
-			icon="<img src='/images/itemimages/"+ADV_ICONS[dropName]+".gif'/>";
+			icon="<img src='images/itemimages/"+ADV_ICONS[dropName]+".gif'/>";
 		}
 		rv+="<tr"+(isAdv?" style='font-weight:bold'":"")+"><td style='text-align:right'>"+fight+"</td><td>"+dropName+"</td><td>"+icon+"</td></tr>";
 	}
