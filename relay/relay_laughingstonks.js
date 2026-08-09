@@ -113,10 +113,27 @@ function handleSearch(config){
 	let rv="<style>table{border-spacing:0px} tr:nth-child(even){background-color:#FFFFFF} tr:nth-child(odd){background-color:#DDDDDD} td{padding:2px 5px}</style>";
 	
 	if(config.dumpAll){
-		for(combo of getClassPathCombos()){
-			rv+="<b>"+combo.className+" / "+combo.pathName+"</b><br/>";
-			rv+=buildTable(combo.classId,combo.pathId,1,4);
+		toc="<a name='toc'/><table>";
+		tables="";
+		idx=0;
+		for(pathData of getClassPathCombos()){
+			toc+="<tr><td>"+pathData.pathName+"</td>";
+			let w=0;
+			for(clazz of pathData.classes){
+				idx++;
+				w++;
+				let abbrClassName=clazz.className.match(/\b\S/g).join("").toUpperCase();
+				toc+="<td><a href='#a"+idx+"'>"+abbrClassName+"</a></td>";
+				tables+="<a name='a"+idx+"'/><b>"+pathData.pathName+" / "+clazz.className+"</b> <a href='#toc'>&uarr;</a><br/>";
+				tables+=buildTable(clazz.classId,pathData.pathId,1,4);
+			}
+			if(w<6){
+				toc+="<td colspan='"+(6-w)+"'></td>";
+			}
+			toc+="</tr>";
 		}
+		toc+="</table><br/>\n";
+		rv+=toc+tables;
 	}else{
 		rv+="<b>Results:</b><br/><br/>";
 		rv+=buildTable(config.classId,config.pathId,config.daycountMin,config.daycountMax);
@@ -180,21 +197,23 @@ function getClassPathCombos(){
 	rv=[];
 				
 	for(path of [Path.get("none"), ...Path.all()]){
-		let pathClassFound=false;
+		let pathName=path.id==0?"Unrestricted":path.name;
+		let pathData={pathName,pathId:path.id,classes:[]};
 		for(clazz of Class.all()){
 			if(clazz.path==path){
-				pathClassFound=true;
-				let pathName=path.id==0?"Unrestricted":path.name;
-				rv.push({classId:clazz.id,className:kol.toString(clazz),pathId:path.id,pathName});
+				pathData.classes.push({classId:clazz.id,className:kol.toString(clazz)});
 			}
 		}
-		if(!pathClassFound){
+		if(pathData.classes.length==0){
 			for(i=1;i<=6;i++){
 				clazz=kol.toClass(i);
-				rv.push({classId:clazz.id,className:kol.toString(clazz),pathId:path.id,pathName:path.name});
+				pathData.classes.push({classId:clazz.id,className:kol.toString(clazz)});
 			}
 		}
+		pathData.classes.sort((a,b)=>a.classId-b.classId);
+		rv.push(pathData);
 	}
-	rv.sort((a,b)=>(a.pathId*1000+a.classId)-(b.pathId*1000+b.classId));
+	
+	rv.sort((a,b)=>a.pathId-b.pathId);
 	return rv;
 }
