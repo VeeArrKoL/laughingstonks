@@ -30,7 +30,7 @@ function handleDump(){
 			w++;
 			let abbrClassName=clazz.className.match(/\b\S/g).join("").toUpperCase();
 			toc+="<td><a href='#a"+idx+"'>"+abbrClassName+"</a></td>";
-			tables+="<a name='a"+idx+"'/><b>"+pathData.pathName+" / "+clazz.className+"</b> <a href='#toc'>&uarr;</a><br/>";
+			tables+="<h3><a name='a"+idx+"'/><b>"+pathData.pathName+" / "+clazz.className+"</b> <a style='text-decoration:none' href='#toc'>&#10548;</a></h3>";
 			tables+=LSJ.buildTable(clazz.classId,pathData.pathId,1,4);
 		}
 		if(w<6){
@@ -50,8 +50,10 @@ function handleDump(){
 
 function getClassPathCombos(){
 	rv=[];
+	
+	let nextId=Path.all().sort((a,b)=>b.id-a.id)[1].id+1;
 				
-	for(path of [{id:0,name:"Unrestricted"}, ...Path.all()]){
+	for(path of [{id:0,name:"Unrestricted"},{id:nextId,name:"&lt;next path: ID #"+nextId+"&gt;"}, ...Path.all()]){
 		let pathData={pathName:path.name,pathId:path.id,classes:[]};
 		for(clazz of Class.all()){
 			if(clazz.path.id==path.id){
