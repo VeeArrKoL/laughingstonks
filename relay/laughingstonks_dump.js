@@ -17,11 +17,13 @@ module.exports.main = function main(){
 function handleDump(){
 	let rv="<style>table{border-spacing:0px} tr:nth-child(even){background-color:#FFFFFF} tr:nth-child(odd){background-color:#DDDDDD} td{padding:2px 5px}</style>";
 	
-	toc="<a name='toc'/><table>";
-	tables="";
-	idx=0;
-	for(pathData of getClassPathCombos()){
-		toc+="<tr><td>"+pathData.pathName+"</td>";
+	let toc="<h2><a href='https://github.com/VeeArrKoL/laughingstonks'>laughingstonks</a></h2><a name='toc'/><table><tr style='background-color:#FFFFFF; vertical-align:top'><td><table>\n";
+	let tables="";
+	let idx=0;
+	let i=0;
+	let combos=getClassPathCombos();
+	for(pathData of combos){
+		toc+="<tr><td>"+pathData.pathName+"</td>\n";
 		let w=0;
 		for(clazz of pathData.classes){
 			idx++;
@@ -35,9 +37,13 @@ function handleDump(){
 			toc+="<td colspan='"+(6-w)+"'></td>";
 		}
 		toc+="</tr>";
+		i++;
+		if(i==Math.ceil(combos.length/2)){
+			toc+="</table></td><td><table>";
+		}
 	}
-	toc+="</table><br/>\n";
-	rv+=toc+tables;
+	toc+="</table></td></tr></table>\n";
+	rv+=toc+"<br/><hr/><br/>\n"+tables;
 		
 	return rv;
 }
