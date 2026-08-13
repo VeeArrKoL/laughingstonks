@@ -1,9 +1,6 @@
 // laughingstonks
 // by VeeArr (#2045369)
 
-script "laughingstonks";
-notify "VeeArr";
-
 int[11] FIXED_DROP_TURNS={1,2,4,7,11,16,22,29,37,46,56};
 item[19] BASIC_FRUIT={$item[orange], $item[grapefruit], $item[grapes], $item[lemon], $item[lime], $item[papaya], $item[cranberries], $item[strawberry], $item[cherry], $item[kumquat], $item[tangerine], $item[raspberry], $item[kiwi], $item[blackberry], $item[banana], $item[cactus fruit], $item[plum], $item[pear], $item[peach]};
 item[3] ADV_FRUIT={$item[classic banana], $item[antique watermelon], $item[quince]};
@@ -64,8 +61,12 @@ item[int] laughing_stock_drops(class clazz, path the_path, int daycount, int max
 	return laughing_stock_drops(clazz.id, the_path.id, daycount, max_fights);
 }
 
+item[int] laughing_stock_drops(int max_fights){
+	return laughing_stock_drops(my_class(), my_path(), my_daycount(), max_fights);
+}
+
 void main(){
-	item[int] results=laughing_stock_drops(my_class(), my_path(), my_daycount(), 500);
+	item[int] results=laughing_stock_drops(500);
 	foreach fight_num, drop in results {
 		print(`{fight_num} {drop.name}`);
 	}
