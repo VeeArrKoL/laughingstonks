@@ -21,24 +21,7 @@ Laughingstonks supports the following configuration properties:
 | `laughingstonks_maxFights` | `500` | The maximum number of fights on each day to display data for. (Only applies to the relay script, not API calls.) |
 
 ## API
-It is possible to call the underlying laughingstonks functions directly. Note that these will return no data if `daycount > 4`, as the drops are no longer seeded beyond that point.
-
-Signatures:
-```
-item[int] laughing_stock_drops(int class_id, int path_id, int daycount, int max_fights);
-
-item[int] laughing_stock_drops(class clazz, path the_path, int daycount, int max_fights);
-```
-
-Example:
-```
-import <laughingstonks.ash>;
-
-item[int] laughing_stock_drops(my_class(), my_path(), my_daycount(), 500);
-foreach fight_num, drop in results {
-	print(`{fight_num} {drop.name}`);
-}
-```
+It is possible to call the underlying laughingstonks functions directly. See the [API branch](https://github.com/VeeArrKoL/laughingstonks/tree/api) for details.
 
 ## Questions
 * Why does the interface look so bad?
