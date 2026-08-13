@@ -15,6 +15,9 @@ Signatures:
 item[int] laughing_stock_drops(int class_id, int path_id, int daycount, int max_fights);
 
 item[int] laughing_stock_drops(class clazz, path the_path, int daycount, int max_fights);
+
+// Uses current class, path, and daycount.
+item[int] laughing_stock_drops(int max_fights);
 ```
 
 Example:
